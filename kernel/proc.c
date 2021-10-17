@@ -105,7 +105,6 @@ static struct proc*
 allocproc(void)
 {
   struct proc *p;
-
   for(p = proc; p < &proc[NPROC]; p++) {
     acquire(&p->lock);
     if(p->state == UNUSED) {
@@ -119,7 +118,9 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
-
+  p->alarm = 0;
+  p->function = 0;
+  p->enable_alarm = 0;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -164,6 +165,10 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->enable_alarm = 0;
+  p->alarm = 0;
+  p->n = 0;
+  p->function = 0;
 }
 
 // Create a user page table for a given process,
